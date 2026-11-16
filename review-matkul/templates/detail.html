@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ matkul.nama }} - Review Matkul</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Navbar Login Gimmick -->
+    <nav class="bg-white border-b border-slate-200 px-4 py-3">
+        <div class="max-w-3xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            <a href="{{ url_for('index') }}" class="font-bold text-lg text-blue-600">ReviewMatkul</a>
+            
+            {% if user %}
+                <div class="flex items-center gap-3 text-sm">
+                    <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
+                        Halo, {{ user.nama }} ({{ user.role }}{% if user.angkatan %} {{ user.angkatan }}{% endif %})
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:underline font-medium">Keluar</a>
+                </div>
+            {% else %}
+                <form action="{{ url_for('login') }}" method="POST" class="flex flex-wrap items-center gap-2 text-sm">
+                    <input type="text" name="nama" required placeholder="Nama kamu..." class="px-2.5 py-1 border border-slate-300 rounded-md w-32 focus:outline-none focus:border-blue-500">
+                    <select name="role" id="roleSelect" onchange="toggleAngkatan()" class="px-2 py-1 border border-slate-300 rounded-md bg-white">
+                        <option value="Mahasiswa">Mahasiswa</option>
+                        <option value="Dosen">Dosen</option>
+                    </select>
+                    <input type="number" name="angkatan" id="angkatanInput" placeholder="Angkatan (2025)" class="px-2.5 py-1 border border-slate-300 rounded-md w-36 focus:outline-none focus:border-blue-500">
+                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium">Masuk</button>
+                </form>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <a href="{{ url_for('index') }}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:underline mb-6">
+            ← Kembali ke Daftar Matkul
+        </a>
+
+        <!-- Card Informasi Utama Matkul -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+            <div class="flex flex-wrap justify-between items-start gap-4">
+                <div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-700">
+                        {{ matkul.kode }} • {{ matkul.jenis }} ({{ matkul.prodi }}) 
+                        {% if matkul.semester %}• Semester {{ matkul.semester }}{% endif %}
+                        • {{ matkul.sks }} SKS
+                    </span>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mt-3">{{ matkul.nama }}</h1>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {% if matkul.jenis == 'Pilihan' %}
+                    <form action="{{ url_for('upvote', matkul_id=matkul.id) }}" method="POST">
+                        <button type="submit" class="px-4 py-3 rounded-xl text-sm font-bold bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 transition">
+                            ▲ Upvote ({{ matkul.upvotes }})
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <div class="text-right bg-amber-50 px-4 py-2 rounded-xl border border-amber-100">
+                        <div class="text-2xl font-bold text-amber-500">★ {{ rata_rating }} <span class="text-sm text-slate-400 font-normal">/ 5.0</span></div>
+                        <div class="text-xs text-slate-500">Dari {{ matkul.reviews|length }} ulasan</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deskripsi -->
+            <div class="mt-6">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Deskripsi Mata Kuliah</h3>
+                <p class="text-slate-700 mt-2 leading-relaxed">{{ matkul.deskripsi }}</p>
+            </div>
+
+            <!-- Topik Utama -->
+            <div class="mt-6 pt-6 border-t border-slate-100">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Topik Utama yang Dipelajari</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for topik in matkul.topik_utama %}
+                    <span class="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm rounded-lg font-medium">
+                        • {{ topik }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Tambah Rating & Review -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Tulis Rating & Ulasanmu</h2>
+            <form method="POST" action="{{ url_for('detail', matkul_id=matkul.id) }}" class="space-y-4">
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Berikan Rating (1 - 5)</label>
+                        <select name="rating" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                            <option value="5">★★★★★ (5 - Sangat Bagus)</option>
+                            <option value="4">★★★★☆ (4 - Bagus)</option>
+                            <option value="3" selected>★★★☆☆ (3 - Cukup / Standar)</option>
+                            <option value="2">★★☆☆☆ (2 - Kurang)</option>
+                            <option value="1">★☆☆☆☆ (1 - Sangat Berat/Kurang)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Dosen Pengampu</label>
+                        <input type="text" name="dosen" required placeholder="Contoh: Pak Budi Santoso" 
+                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Pilihan Anonim atau Tampilkan Identitas -->
+                <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Tampilkan Identitas Sebagai:</label>
+                    <div class="flex flex-col sm:flex-row gap-4 text-sm">
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="identitas" value="anonim" checked class="text-blue-600">
+                            <span>Anonim (Sembunyikan nama)</span>
+                        </label>
+
+                        {% if user %}
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="identitas" value="publik" class="text-blue-600">
+                            <span class="font-medium text-blue-700">
+                                {{ user.nama }} ({{ user.role }}{% if user.angkatan %} {{ user.angkatan }}{% endif %})
+                            </span>
+                        </label>
+                        {% else %}
+                        <span class="text-slate-400 italic">
+                            (Isi nama & klik "Masuk" di pojok kanan atas jika ingin tampilkan identitas)
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Ulasan / Pengalaman Mengambil Matkul</label>
+                    <textarea name="komentar" rows="3" required placeholder="Ceritakan gaya mengajar dosen, beban tugas, ujian, atau tips lulus..." 
+                              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition">
+                    Kirim Rating & Ulasan
+                </button>
+            </form>
+        </div>
+
+        <!-- Daftar Ulasan -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Ulasan Masuk ({{ matkul.reviews|length }})</h2>
+            <div class="space-y-4">
+                {% for rev in matkul.reviews|reverse %}
+                <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-amber-500">
+                                {% for _ in range(rev.rating) %}★{% endfor %}{% for _ in range(5 - rev.rating) %}☆{% endfor %}
+                            </span>
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                                Dosen: {{ rev.dosen }}
+                            </span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500">Oleh: {{ rev.penulis }}</span>
+                    </div>
+                    <p class="text-sm text-slate-700 mt-2">{{ rev.komentar }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAngkatan() {
+            const role = document.getElementById("roleSelect").value;
+            const angkatanInput = document.getElementById("angkatanInput");
+            angkatanInput.style.display = (role === "Mahasiswa") ? "inline-block" : "none";
+        }
+    </script>
+</body>
+</html>
