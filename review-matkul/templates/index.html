@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Si Review</title>
+    <title>Review Matkul</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
 
-    <!-- Navbar Login Gimmick -->
-    <nav class="bg-white border-b border-slate-200 px-4 py-3">
-        <div class="max-w-4xl mx-auto flex flex-wrap justify-between items-center gap-3">
-            <a href="{{ url_for('index') }}" class="font-bold text-lg text-blue-600">ReviewMatkul</a>
+    <!-- Top Navbar -->
+    <header class="bg-white border-b border-slate-200 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <a href="{{ url_for('index', kategori='home') }}" class="font-bold text-lg text-blue-600 cursor-pointer">
+                    ReviewMatkul
+                </a>
+                <a href="{{ url_for('index', kategori='home') }}" class="text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition">
+                    Home
+                </a>
+            </div>
             
             {% if user %}
                 <div class="flex items-center gap-3 text-sm">
                     <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
                         Halo, {{ user.nama }} ({{ user.role }}{% if user.angkatan %} {{ user.angkatan }}{% endif %})
                     </span>
-                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:underline font-medium">Keluar</a>
+                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:underline font-medium cursor-pointer">Keluar</a>
                 </div>
             {% else %}
                 <form action="{{ url_for('login') }}" method="POST" class="flex flex-wrap items-center gap-2 text-sm">
@@ -28,113 +35,153 @@
                         <option value="Dosen">Dosen</option>
                     </select>
                     <input type="number" name="angkatan" id="angkatanInput" placeholder="Angkatan (2025)" class="px-2.5 py-1 border border-slate-300 rounded-md w-36 focus:outline-none focus:border-blue-500">
-                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium">Masuk</button>
+                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium cursor-pointer">Masuk</button>
                 </form>
             {% endif %}
         </div>
-    </nav>
+    </header>
 
-    <div class="max-w-4xl mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="mb-6">
-            <h1 class="text-3xl font-bold text-slate-900">Portal Review Mata Kuliah</h1>
-            <p class="text-slate-600 mt-1">Cek silabus, topik utama, dosen pengampu, dan pengalaman mahasiswa.</p>
-        </header>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- Sidebar Navigasi -->
+            <nav aria-label="Menu Kategori" class="w-full md:w-64 shrink-0 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                <!-- Tombol Home -->
+                <a href="{{ url_for('index', kategori='home') }}" 
+                   class="block w-full px-3.5 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition {{ 'bg-blue-600 text-white' if kategori_aktif == 'home' else 'text-slate-700 hover:bg-slate-100' }}">
+                    🏠 Home
+                </a>
 
-        <!-- Filter Kategori -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="text-sm font-semibold text-slate-700 mr-1">Kategori:</span>
-                <a href="{{ url_for('index', jenis='Semua') }}" 
-                   class="px-4 py-2 rounded-lg text-sm font-medium {{ 'bg-blue-600 text-white' if jenis_aktif == 'Semua' else 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
-                   Semua Matkul
-                </a>
-                <a href="{{ url_for('index', jenis='Wajib') }}" 
-                   class="px-4 py-2 rounded-lg text-sm font-medium {{ 'bg-blue-600 text-white' if jenis_aktif == 'Wajib' else 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
-                   Matkul Wajib
-                </a>
-                <a href="{{ url_for('index', jenis='Pilihan') }}" 
-                   class="px-4 py-2 rounded-lg text-sm font-medium {{ 'bg-blue-600 text-white' if jenis_aktif == 'Pilihan' else 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
-                   Matkul Pilihan
-                </a>
-            </div>
+                <hr class="border-slate-100 my-2">
 
-            <!-- Filter Lanjutan khusus Matkul Wajib (Prodi & Semester) -->
-            {% if jenis_aktif == 'Wajib' %}
-            <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
-                <!-- Pilih Prodi -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-semibold text-slate-700 w-20">Prodi:</span>
-                    <a href="{{ url_for('index', jenis='Wajib', prodi='Semua', semester=semester_aktif) }}"
-                       class="px-3 py-1 rounded-full text-xs font-medium {{ 'bg-indigo-600 text-white' if prodi_aktif == 'Semua' else 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100' }}">
-                       Semua Prodi
+                <!-- Navigasi Matkul Wajib & Prodi -->
+                <div>
+                    <a href="{{ url_for('index', kategori='wajib', prodi='Semua') }}" 
+                       class="block w-full px-3.5 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition {{ 'bg-blue-600 text-white' if (kategori_aktif == 'wajib' and prodi_aktif == 'Semua') else 'text-slate-800 hover:bg-slate-100' }}">
+                        📚 Matkul Wajib
                     </a>
-                    {% for prodi in daftar_prodi %}
-                    <a href="{{ url_for('index', jenis='Wajib', prodi=prodi, semester=semester_aktif) }}"
-                       class="px-3 py-1 rounded-full text-xs font-medium {{ 'bg-indigo-600 text-white' if prodi_aktif == prodi else 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100' }}">
-                       {{ prodi }}
-                    </a>
-                    {% endfor %}
+
+                    <div class="mt-1.5 ml-3 pl-3 border-l-2 border-slate-200 space-y-1">
+                        {% for prodi in daftar_prodi %}
+                        <a href="{{ url_for('index', kategori='wajib', prodi=prodi) }}"
+                           class="block w-full px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer transition {{ 'bg-indigo-600 text-white' if (kategori_aktif == 'wajib' and prodi_aktif == prodi) else 'text-slate-600 hover:bg-indigo-50 hover:text-indigo-700' }}">
+                            Prodi {{ prodi }}
+                        </a>
+                        {% endfor %}
+                    </div>
                 </div>
 
-                <!-- Pilih Semester -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-semibold text-slate-700 w-20">Semester:</span>
-                    <a href="{{ url_for('index', jenis='Wajib', prodi=prodi_aktif, semester='Semua') }}"
-                       class="px-3 py-1 rounded-full text-xs font-medium {{ 'bg-emerald-600 text-white' if semester_aktif == 'Semua' else 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                <hr class="border-slate-100 my-2">
+
+                <!-- Navigasi Matkul Pilihan -->
+                <a href="{{ url_for('index', kategori='pilihan') }}" 
+                   class="block w-full px-3.5 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition {{ 'bg-emerald-600 text-white' if kategori_aktif == 'pilihan' else 'text-slate-700 hover:bg-slate-100' }}">
+                    ✨ Matkul Pilihan
+                </a>
+            </nav>
+
+            <!-- Konten Utama -->
+            <main class="flex-1 w-full">
+                <!-- Judul Halaman -->
+                <div class="mb-5">
+                    {% if kategori_aktif == 'home' %}
+                        <h1 class="text-2xl font-bold text-slate-900">Semua Mata Kuliah</h1>
+                        <p class="text-sm text-slate-600 mt-1">Cari dan jelajahi seluruh daftar mata kuliah yang tersedia.</p>
+                    {% elif kategori_aktif == 'wajib' %}
+                        <h1 class="text-2xl font-bold text-slate-900">
+                            Mata Kuliah Wajib {% if prodi_aktif != 'Semua' %}— Prodi {{ prodi_aktif }}{% endif %}
+                        </h1>
+                        {% if prodi_aktif == 'Semua' %}
+                            <p class="text-sm text-slate-600 mt-1">Pilih salah satu <strong>Prodi</strong> di menu samping untuk memunculkan filter Semester.</p>
+                        {% else %}
+                            <p class="text-sm text-slate-600 mt-1">Gunakan tombol semester di bawah untuk menyortir mata kuliah wajib {{ prodi_aktif }}.</p>
+                        {% endif %}
+                    {% elif kategori_aktif == 'pilihan' %}
+                        <h1 class="text-2xl font-bold text-slate-900">Mata Kuliah Pilihan</h1>
+                        <p class="text-sm text-slate-600 mt-1">Daftar mata kuliah pilihan / opsional yang dapat diambil mahasiswa.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Kolom Pencarian (HANYA MUNCUL SAAT DI HOME) -->
+                {% if kategori_aktif == 'home' %}
+                <form action="{{ url_for('index') }}" method="GET" class="mb-6 flex flex-wrap gap-2">
+                    <input type="hidden" name="kategori" value="home">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Cari nama matkul, kode, atau topik utama..." 
+                           class="flex-1 min-w-[220px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-blue-500 shadow-sm">
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-xl cursor-pointer transition shadow-sm">
+                        🔍 Cari
+                    </button>
+                    {% if search_query %}
+                    <a href="{{ url_for('index', kategori='home') }}" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-xl cursor-pointer transition">
+                        Reset
+                    </a>
+                    {% endif %}
+                </form>
+                {% endif %}
+
+                <!-- Tombol Filter Semester (HANYA MUNCUL SAAT MATKUL WAJIB + SUDAH PILIH PRODI) -->
+                {% if tampilkan_semester and daftar_semester %}
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-semibold text-slate-700 mr-1">Semester:</span>
+                    <a href="{{ url_for('index', kategori='wajib', prodi=prodi_aktif, semester='Semua') }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-medium cursor-pointer transition {{ 'bg-blue-600 text-white' if semester_aktif == 'Semua' else 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                        Semua Semester
                     </a>
                     {% for sem in daftar_semester %}
-                    <a href="{{ url_for('index', jenis='Wajib', prodi=prodi_aktif, semester=sem) }}"
-                       class="px-3 py-1 rounded-full text-xs font-medium {{ 'bg-emerald-600 text-white' if semester_aktif == sem|string else 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                    <a href="{{ url_for('index', kategori='wajib', prodi=prodi_aktif, semester=sem) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-medium cursor-pointer transition {{ 'bg-blue-600 text-white' if semester_aktif == sem|string else 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                        Semester {{ sem }}
                     </a>
                     {% endfor %}
                 </div>
-            </div>
-            {% endif %}
-        </div>
+                {% endif %}
 
-        <!-- Daftar Kartu Matkul -->
-        <div class="grid gap-4 md:grid-cols-2">
-            {% for matkul in matkul_list %}
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-700">
-                            {{ matkul.kode }} • {{ matkul.sks }} SKS
-                            {% if matkul.semester %} • Sem {{ matkul.semester }}{% endif %}
-                        </span>
-                        <span class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-lg">
-                            ★ {{ matkul.rata_rating }} <span class="text-xs font-normal text-slate-500">({{ matkul.reviews|length }})</span>
-                        </span>
+                <!-- Daftar Kartu Matkul -->
+                <div class="grid gap-4 sm:grid-cols-2">
+                    {% for matkul in matkul_list %}
+                    <a href="{{ url_for('detail', matkul_id=matkul.id, kategori=kategori_aktif, prodi=prodi_aktif, semester=semester_aktif) }}" 
+                       class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-md transition flex flex-col justify-between cursor-pointer">
+                        <div>
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-700">
+                                    {{ matkul.kode }} • {{ matkul.sks }} SKS
+                                    {% if tampilkan_semester and matkul.semester %} • Sem {{ matkul.semester }}{% endif %}
+                                </span>
+                                <span class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-lg shrink-0">
+                                    ★ {{ matkul.rata_rating }} <span class="text-xs font-normal text-slate-500">({{ matkul.reviews|length }})</span>
+                                </span>
+                            </div>
+                            
+                            <h2 class="text-lg font-bold text-slate-900 mt-2">{{ matkul.nama }}</h2>
+                            
+                            <div class="mt-2 space-y-1">
+                                {% if matkul.prodi_wajib %}
+                                <p class="text-xs text-blue-600 font-medium">
+                                    Wajib: {{ matkul.wajib_teks }}
+                                </p>
+                                {% endif %}
+                                {% if matkul.prodi_pilihan %}
+                                <p class="text-xs text-emerald-600 font-medium">
+                                    Pilihan: {{ matkul.pilihan_teks }}
+                                </p>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-sm text-slate-600 mt-3 line-clamp-2">{{ matkul.deskripsi }}</p>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <span class="text-sm font-medium text-blue-600">Lihat Detail & Review →</span>
+                        </div>
+                    </a>
+                    {% else %}
+                    <div class="col-span-2 bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500">
+                        Tidak ada mata kuliah yang ditemukan.
                     </div>
-                    
-                    <a href="{{ url_for('detail', matkul_id=matkul.id) }}" class="block mt-2">
-                        <h2 class="text-lg font-bold text-slate-900 hover:text-blue-600">{{ matkul.nama }}</h2>
-                    </a>
-                    <p class="text-xs text-blue-600 font-medium mt-0.5">{{ matkul.jenis }} — {{ matkul.prodi }}</p>
-                    <p class="text-sm text-slate-600 mt-3 line-clamp-2">{{ matkul.deskripsi }}</p>
+                    {% endfor %}
                 </div>
+            </main>
 
-                <!-- Footer Kartu: Tombol Detail & Upvote (Khusus Matkul Pilihan) -->
-                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <a href="{{ url_for('detail', matkul_id=matkul.id) }}" class="text-sm font-medium text-blue-600 hover:underline">
-                        Lihat Detail & Review →
-                    </a>
-
-                    {% if matkul.jenis == 'Pilihan' %}
-                    <form action="{{ url_for('upvote', matkul_id=matkul.id) }}" method="POST">
-                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 transition">
-                            ▲ Upvote ({{ matkul.upvotes }})
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <p class="text-slate-500 col-span-2 text-center py-8">Tidak ada mata kuliah yang sesuai dengan filter.</p>
-            {% endfor %}
         </div>
     </div>
 

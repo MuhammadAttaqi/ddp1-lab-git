@@ -8,17 +8,24 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
 
-    <!-- Navbar Login Gimmick -->
-    <nav class="bg-white border-b border-slate-200 px-4 py-3">
-        <div class="max-w-3xl mx-auto flex flex-wrap justify-between items-center gap-3">
-            <a href="{{ url_for('index') }}" class="font-bold text-lg text-blue-600">ReviewMatkul</a>
+    <!-- Top Navbar -->
+    <header class="bg-white border-b border-slate-200 px-4 py-3">
+        <div class="max-w-4xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <a href="{{ url_for('index', kategori='home') }}" class="font-bold text-lg text-blue-600 cursor-pointer">
+                    ReviewMatkul
+                </a>
+                <a href="{{ url_for('index', kategori='home') }}" class="text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition">
+                    Home
+                </a>
+            </div>
             
             {% if user %}
                 <div class="flex items-center gap-3 text-sm">
                     <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
                         Halo, {{ user.nama }} ({{ user.role }}{% if user.angkatan %} {{ user.angkatan }}{% endif %})
                     </span>
-                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:underline font-medium">Keluar</a>
+                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:underline font-medium cursor-pointer">Keluar</a>
                 </div>
             {% else %}
                 <form action="{{ url_for('login') }}" method="POST" class="flex flex-wrap items-center gap-2 text-sm">
@@ -28,14 +35,15 @@
                         <option value="Dosen">Dosen</option>
                     </select>
                     <input type="number" name="angkatan" id="angkatanInput" placeholder="Angkatan (2025)" class="px-2.5 py-1 border border-slate-300 rounded-md w-36 focus:outline-none focus:border-blue-500">
-                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium">Masuk</button>
+                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium cursor-pointer">Masuk</button>
                 </form>
             {% endif %}
         </div>
-    </nav>
+    </header>
 
     <div class="max-w-3xl mx-auto px-4 py-8">
-        <a href="{{ url_for('index') }}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:underline mb-6">
+        <a href="{{ url_for('index', kategori=asal_kategori, prodi=asal_prodi, semester=asal_semester) }}" 
+           class="inline-flex items-center text-sm font-medium text-blue-600 hover:underline mb-6 cursor-pointer">
             ← Kembali ke Daftar Matkul
         </a>
 
@@ -43,27 +51,27 @@
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
             <div class="flex flex-wrap justify-between items-start gap-4">
                 <div>
-                    <span class="text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-700">
-                        {{ matkul.kode }} • {{ matkul.jenis }} ({{ matkul.prodi }}) 
-                        {% if matkul.semester %}• Semester {{ matkul.semester }}{% endif %}
-                        • {{ matkul.sks }} SKS
-                    </span>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-700">
+                            {{ matkul.kode }} • {{ matkul.sks }} SKS
+                            {% if tampilkan_semester and matkul.semester %} • Semester {{ matkul.semester }}{% endif %}
+                        </span>
+                    </div>
                     <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mt-3">{{ matkul.nama }}</h1>
+                    
+                    <div class="mt-2 space-y-1">
+                        {% if matkul.prodi_wajib %}
+                        <p class="text-xs font-semibold text-blue-600">Wajib untuk: {{ matkul.wajib_teks }}</p>
+                        {% endif %}
+                        {% if matkul.prodi_pilihan %}
+                        <p class="text-xs font-semibold text-emerald-600">Pilihan untuk: {{ matkul.pilihan_teks }}</p>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    {% if matkul.jenis == 'Pilihan' %}
-                    <form action="{{ url_for('upvote', matkul_id=matkul.id) }}" method="POST">
-                        <button type="submit" class="px-4 py-3 rounded-xl text-sm font-bold bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 transition">
-                            ▲ Upvote ({{ matkul.upvotes }})
-                        </button>
-                    </form>
-                    {% endif %}
-
-                    <div class="text-right bg-amber-50 px-4 py-2 rounded-xl border border-amber-100">
-                        <div class="text-2xl font-bold text-amber-500">★ {{ rata_rating }} <span class="text-sm text-slate-400 font-normal">/ 5.0</span></div>
-                        <div class="text-xs text-slate-500">Dari {{ matkul.reviews|length }} ulasan</div>
-                    </div>
+                <div class="text-right bg-amber-50 px-4 py-2 rounded-xl border border-amber-100">
+                    <div class="text-2xl font-bold text-amber-500">★ {{ rata_rating }} <span class="text-sm text-slate-400 font-normal">/ 5.0</span></div>
+                    <div class="text-xs text-slate-500">Dari {{ matkul.reviews|length }} ulasan</div>
                 </div>
             </div>
 
@@ -89,7 +97,7 @@
         <!-- Form Tambah Rating & Review -->
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
             <h2 class="text-lg font-bold text-slate-900 mb-4">Tulis Rating & Ulasanmu</h2>
-            <form method="POST" action="{{ url_for('detail', matkul_id=matkul.id) }}" class="space-y-4">
+            <form method="POST" action="{{ url_for('detail', matkul_id=matkul.id, kategori=asal_kategori, prodi=asal_prodi, semester=asal_semester) }}" class="space-y-4">
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
@@ -140,7 +148,7 @@
                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
-                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition">
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg cursor-pointer transition">
                     Kirim Rating & Ulasan
                 </button>
             </form>

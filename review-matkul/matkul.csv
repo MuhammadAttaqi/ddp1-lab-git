@@ -1,0 +1,8 @@
+id,kode,nama,prodi_wajib,prodi_pilihan,semester,sks,deskripsi,topik_utama
+1,CS101,Dasar-Dasar Pemrograman 1,IK;SI;IK KKI;KA,,1,4,Pengenalan logika pemrograman algoritma dasar dan struktur data menggunakan bahasa Python.,Variabel & Tipe Data;Percabangan & Perulangan;Fungsi & Rekursi;List & Dictionary
+2,CS490,Logika & Struktur Diskret, KA,,1,4,Fondasi teoritis dan logis utama untuk pemograman.,Logika Proposional; Logika Predikat; Inferensi; Induksi Matematika; Aturan Berhitung
+22,AI102,Aljabar Linear,IK;IK KKI;KA:1,SI,3,3,Konsep vektor matriks nilai eigen dan penerapannya dalam komputasi serta machine learning.,Operasi Matriks;Ruang Vektor;Eigenvalues & Eigenvectors;Singular Value Decomposition (SVD)
+32,SI103,Sistem Basis Data,IK;SI;IK KKI,KA,3,3,Perancangan model relasional normalisasi data dan bahasa query SQL untuk pengelolaan data skala besar.,Entity Relationship Diagram (ERD);Normalisasi (1NF-3NF);SQL Queries & Join;Transaksi & Indexing
+43,AI201,Pembelajaran Mesin (Machine Learning),KA,IK;SI;IK KKI,3,4,Algoritma supervised dan unsupervised learning evaluasi model serta pengenalan neural networks.,Regresi & Klasifikasi;Decision Trees & Ensemble;Clustering;Evaluasi & Validasi Model
+52,EL201,Pengantar Robotika & Otomasi,,IK;SI;IK KKI;KA,,3,Dasar kinematika robot sensor aktuator dan pemrograman mikrokontroler dasar.,Sensor & Aktuator;Kinematika Maju;Kontrol PID Dasar;Simulasi Robot
+63,EL205,Komputasi Kuantum Dasar,,IK;SI;IK KKI;KA,,3,Pengenalan qubit gerbang logika kuantum dan algoritma dasar seperti Grover dan Shor.,Superposisi & Entanglement;Quantum Gates;Algoritma Deutsch-Jozsa;Simulasi Qiskit
